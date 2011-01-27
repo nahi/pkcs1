@@ -600,7 +600,6 @@ module_function
       dbmask = @mgf.generate(h, emlen - @hlen - 1)
       maskeddb = xor(db, dbmask)
       maskeddb[0] &= (0xff >> (8 * emlen - embits))
-      p [emlen, embits, (0xff >> (8 * emlen - embits))]
       em = maskeddb + h + "\xbc"
       em
     end
