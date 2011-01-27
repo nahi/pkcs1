@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-require 'openssl'
 require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
@@ -56,19 +55,27 @@ module_function
     end
     a.pack("C*")
   end
+
+  def mod_exp(x, b, n)
+    (8 * b.size).downto(0).to_enum.inject(1) { |r, e|
+      r = r * r % n
+      r = r * x % n if b[e] == 1
+      r
+    }
+  end
 end
 
 
 # 3 Key types
 module Key
   class RSAPublicKey
+    include Util
+
     attr_reader :n
     attr_reader :e
 
     def initialize(n, e)
       @n, @e = n, e
-      @n_bn = OpenSSL::BN.new(@n.to_s)
-      @e_bn = OpenSSL::BN.new(@e.to_s)
     end
 
     def encrypt(m)
@@ -87,8 +94,7 @@ module Key
 
     # c = m ^ e (mod n)
     def calc(input)
-      input_bn = OpenSSL::BN.new(input.to_s)
-      (input_bn.mod_exp(@e_bn, @n_bn)).to_i
+      mod_exp(input, @e, @n)
     end
   end
 
@@ -104,8 +110,6 @@ module Key
     def initialize(n, e, d)
       @version = 0
       @n, @d = n, d
-      @n_bn = OpenSSL::BN.new(@n.to_s)
-      @d_bn = OpenSSL::BN.new(@d.to_s)
       @public_key = RSAPublicKey.new(n, e)
     end
 
@@ -140,8 +144,7 @@ module Key
 
     # s = m ^ d (mod n)
     def calc(input)
-      input_bn = OpenSSL::BN.new(input.to_s)
-      (input_bn.mod_exp(@d_bn, @n_bn)).to_i
+      mod_exp(input, @d, @n)
     end
   end
 
@@ -161,13 +164,7 @@ module Key
     def initialize(n, e, p, q, dp, dq, qinv)
       @version = 0
       @n = n
-      @n_bn = OpenSSL::BN.new(@n.to_s)
       @p, @q, @dp, @dq, @qinv = p, q, dp, dq, qinv
-      @p_bn = OpenSSL::BN.new(@p.to_s)
-      @q_bn = OpenSSL::BN.new(@q.to_s)
-      @dp_bn = OpenSSL::BN.new(@dp.to_s)
-      @dq_bn = OpenSSL::BN.new(@dq.to_s)
-      @qinv_bn = OpenSSL::BN.new(@qinv.to_s)
       @public_key = RSAPublicKey.new(n, e)
     end
 
@@ -205,11 +202,10 @@ module Key
     # h = (s1 - s2) * qinv (mod p)
     # s = s2 + q * h
     def calc(input)
-      input_bn = OpenSSL::BN.new(input.to_s)
-      s1 = input_bn.mod_exp(@dp_bn, @p_bn)
-      s2 = input_bn.mod_exp(@dq_bn, @q_bn)
-      h = @qinv_bn.mod_mul(s1 - s2, @p_bn)
-      (s2 + q * h).to_i
+      s1 = mod_exp(input, @dp, @p)
+      s2 = mod_exp(input, @dq, @q)
+      h = (@qinv * (s1 - s2)).modulo(@p)
+      s2 + q * h
     end
   end
 
@@ -759,6 +755,7 @@ end
 
 
 if $0 == __FILE__
+  require 'openssl'
   pkeyfile = ARGV.shift or raise "pkey file not given"
   osslkey = OpenSSL::PKey::RSA.new(File.read(pkeyfile))
   n = osslkey.n.to_i
