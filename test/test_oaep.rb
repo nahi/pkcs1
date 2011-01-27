@@ -31,7 +31,7 @@ class TestOAEP < Test::Unit::TestCase
     section = title = nil
     key = nil
     n = e = d = p = q = dp = dq = qinv = msg = seed = cipher = nil
-    @content.each do |line|
+    @content.each_line do |line|
       case line
       when /^# Example/
         section = line.chomp

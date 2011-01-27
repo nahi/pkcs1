@@ -49,11 +49,12 @@ module_function
     if a.size != b.size
       raise ArgumentError
     end
-    ary = []
+    a = a.unpack('C*')
+    b = b.unpack('C*')
     a.size.times do |idx|
-      ary << (a[idx] ^ b[idx])
+      a[idx] ^= b[idx]
     end
-    ary.pack("c*")
+    a.pack("C*")
   end
 end
 
@@ -599,7 +600,9 @@ module_function
       db = ps + "\x01" + salt
       dbmask = @mgf.generate(h, emlen - @hlen - 1)
       maskeddb = xor(db, dbmask)
-      maskeddb[0] &= (0xff >> (8 * emlen - embits))
+      ary = maskeddb.unpack('C*')
+      ary[0] &= (0xff >> (8 * emlen - embits))
+      maskeddb = ary.pack('C*')
       em = maskeddb + h + "\xbc"
       em
     end
@@ -702,7 +705,7 @@ module_function
     unless ALGORITHMS.key?(digest)
       raise ArgumentError, "unknown digest: #{digest}"
     end
-    ALGORITHMS[digest][1].pack("c*")
+    ALGORITHMS[digest][1].pack("C*")
   end
 
   def size(digest)
