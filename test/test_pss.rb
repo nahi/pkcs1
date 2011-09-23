@@ -22,7 +22,7 @@ module PKCS1
 
 class TestPSS < Test::Unit::TestCase
   def setup
-    @content = DATA.read
+    @content = TestPSS_DATA
   end
 
   def test_pss
@@ -119,7 +119,7 @@ end
 # Following is the test vectors of PKCS#1 v2.1 RSA-PSS.  The test vectors is
 # published and distributed by RSA.  See PKCS#1 home page.
 
-__END__
+TestPSS_DATA =<<__EOF__
 # ===========================
 # TEST VECTORS FOR RSASSA-PSS
 # ===========================
@@ -2701,3 +2701,4 @@ e2 98 c7 bb ce 2e ee 78 2a 19 5a a6 6f e2 d0 73
 2b 25 e5 95 f5 7d 3e 06 1b 1f c3 e4 06 3b f9 8f 
 
 # =============================================
+__EOF__

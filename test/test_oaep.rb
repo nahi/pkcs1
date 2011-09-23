@@ -22,7 +22,7 @@ module PKCS1
 
 class TestOAEP < Test::Unit::TestCase
   def setup
-    @content = DATA.read
+    @content = TestOAEP_DATA
   end
 
   def test_oaep
@@ -119,7 +119,7 @@ end
 # Following is the test vectors of PKCS#1 v2.1 RSA-OAEP.  The test vectors is
 # published and distributed by RSA.  See PKCS#1 home page.
 
-__END__
+TestOAEP_DATA =<<__EOF__
 =========================
 TEST VECTORS FOR RSA-OAEP
 =========================
@@ -2332,3 +2332,4 @@ d9 0d 25 63 48 1c 9a 22 1f 78 c8 27 2c 82 d1 b6
 2a b9 14 e1 c6 9f 6a f6 ef 30 ca 52 60 db 4a 46 
 
 # =============================================
+__EOF__
