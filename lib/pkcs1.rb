@@ -1,4 +1,4 @@
-# Copyright 2004, 2005  NAKAMURA, Hiroshi <nakahiro@sarion.co.jp>
+# Copyright 2004, 2005, 2011  Hiroshi Nakamura <nahi@ruby-lang.org>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
