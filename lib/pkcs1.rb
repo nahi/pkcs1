@@ -30,7 +30,7 @@ module Util
 module_function
 
   def nbits(num)
-    idx = num.size * 8 - 1
+    idx = divceil(num.size, 4) * 4 * 8 - 1
     while idx >= 0
       if num[idx].nonzero?
         return idx + 1
@@ -217,6 +217,8 @@ end
 
 # 4 Data conversion primitives
 module DataConversion
+  include Util
+
 module_function
 
   # Integer to Octet String primitive
@@ -234,7 +236,11 @@ module_function
   end
 
   def to_bytes(num)
-    bits = num.size * 8
+    # 4 byte alignment needed like; divceil(bignum.size, 4) * 4
+    # In CRuby, we can expect Bignum#size aligns but the returned value
+    # depends on internal representation across Ruby implementations.
+    # For example, (2**64).size == 12 in CRuby but 9 in JRuby and Rubinius.
+    bits = divceil(num.size, 4) * 4 * 8
     pos = value = 0
     str = ""
     for idx in 0..(bits - 1)
